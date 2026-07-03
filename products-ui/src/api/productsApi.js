@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/products';
+const API_URL = 'https://nestjs-products-crud.vercel.app/products';
 
 export const getProducts = () => axios.get(API_URL);
 export const getProduct = (id) => axios.get(`${API_URL}/${id}`);
