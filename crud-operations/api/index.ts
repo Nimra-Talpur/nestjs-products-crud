@@ -1,25 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
-import serverlessExpress from '@vendia/serverless-express';
 import express from 'express';
 import { AppModule } from '../src/app.module';
 
-let cachedServer;
+const expressApp = express();
 
-async function bootstrap() {
-  const expressApp = express();
-  const adapter = new ExpressAdapter(expressApp);
-  const app = await NestFactory.create(AppModule, adapter);
-  app.useGlobalPipes(new ValidationPipe());
-  app.enableCors();
-  await app.init();
-  return serverlessExpress({ app: expressApp });
+let isAppInitialized = false;
+
+async function initApp() {
+  if (!isAppInitialized) {
+    const adapter = new ExpressAdapter(expressApp);
+    const app = await NestFactory.create(AppModule, adapter);
+    app.useGlobalPipes(new ValidationPipe());
+    app.enableCors();
+    await app.init();
+    isAppInitialized = true;
+  }
 }
 
 export default async (req, res) => {
-  if (!cachedServer) {
-    cachedServer = await bootstrap();
-  }
-  return cachedServer(req, res);
+  await initApp();
+  expressApp(req, res);
 };
